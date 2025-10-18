@@ -2,8 +2,8 @@ import { z } from 'zod'
 
 export const leaveRequestSchema = z.object({
   staffId: z.string().min(1, 'スタッフを選択してください'),
-  startDate: z.date(),
-  endDate: z.date(),
+  startDate: z.coerce.date(),
+  endDate: z.coerce.date(),
   type: z.string().min(1, '休暇種別を選択してください'),
   reason: z.string().optional(),
   status: z.string().default('申請中'),

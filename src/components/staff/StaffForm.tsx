@@ -75,11 +75,13 @@ export function StaffForm({ staff, onSuccess, onCancel }: StaffFormProps) {
       const url = staff ? `/api/staff/${staff.id}` : '/api/staff'
       const method = staff ? 'PUT' : 'POST'
 
-      // 資格が'なし'の場合はundefinedに変換
+      // 資格が'なし'の場合はnullに変換
       const submitData = {
         ...data,
-        qualification: data.qualification === 'なし' ? undefined : data.qualification,
+        qualification: data.qualification === 'なし' ? null : data.qualification,
       }
+
+      console.log('Submitting staff data:', submitData)
 
       const response = await fetch(url, {
         method,
@@ -90,15 +92,26 @@ export function StaffForm({ staff, onSuccess, onCancel }: StaffFormProps) {
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
+        const errorText = await response.text()
+        console.error('API Error Response:', errorText)
+
+        let errorData
+        try {
+          errorData = JSON.parse(errorText)
+        } catch {
+          errorData = { error: errorText }
+        }
+
         console.error('API Error:', errorData)
-        throw new Error(errorData.error || '保存に失敗しました')
+        const errorMessage = errorData.error || errorData.details || '保存に失敗しました'
+        throw new Error(errorMessage)
       }
 
       toast.success(staff ? 'スタッフを更新しました' : 'スタッフを登録しました')
       onSuccess()
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'エラーが発生しました')
+      const errorMessage = error instanceof Error ? error.message : 'エラーが発生しました'
+      toast.error(errorMessage)
       console.error('Error:', error)
     } finally {
       setIsSubmitting(false)

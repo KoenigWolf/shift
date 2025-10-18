@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Calendar, Users, Plus, Home } from 'lucide-react'
+import { Calendar, Users, Plus, Home, BarChart } from 'lucide-react'
 
 export function Header() {
   return (
@@ -37,6 +37,12 @@ export function Header() {
               <Button variant="ghost" className="flex items-center space-x-2">
                 <Calendar className="h-4 w-4" />
                 <span>カレンダー</span>
+              </Button>
+            </Link>
+            <Link href="/reports">
+              <Button variant="ghost" className="flex items-center space-x-2">
+                <BarChart className="h-4 w-4" />
+                <span>レポート</span>
               </Button>
             </Link>
           </nav>

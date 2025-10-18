@@ -9,39 +9,69 @@ datasource db {
 
 // スタッフ
 model Staff {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  role      String   // 例: "正社員", "アルバイト"
-  color     String   @default("#3b82f6") // シフト表示用の色
-  shifts    Shift[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                    String              @id @default(cuid())
+  name                  String
+  email                 String              @unique
+  role                  String              // 例: "正看護師", "准看護師", "看護助手"
+  qualification         String?             // 資格: "認定看護師", "専門看護師"など
+  employmentType        String              @default("常勤") // "常勤", "非常勤", "パート"
+  color                 String              @default("#3b82f6") // シフト表示用の色
+  maxConsecutiveDays    Int?                // 最大連続勤務日数
+  maxMonthlyHours       Int?                // 月間最大勤務時間
+  maxNightShifts        Int?                // 月間最大夜勤回数
+  canWorkNight          Boolean             @default(true) // 夜勤可能か
+  shifts                Shift[]
+  leaveRequests         LeaveRequest[]
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
 }
 
 // シフト
 model Shift {
-  id        String   @id @default(cuid())
-  staffId   String
-  staff     Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
-  date      DateTime
-  startTime String   // "09:00"形式
-  endTime   String   // "18:00"形式
-  breakTime Int      @default(60) // 休憩時間（分）
-  memo      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String      @id @default(cuid())
+  staffId    String
+  staff      Staff       @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  date       DateTime
+  shiftType  String      @default("日勤") // "日勤", "夜勤", "準夜勤", "深夜勤"
+  startTime  String      // "09:00"形式
+  endTime    String      // "18:00"形式
+  breakTime  Int         @default(60) // 休憩時間（分）
+  memo       String?
+  status     String      @default("確定") // "下書き", "確定", "承認待ち"
+  isPublished Boolean    @default(false) // スタッフに公開済みか
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 
   @@index([staffId])
   @@index([date])
+  @@index([shiftType])
 }
 
 // シフトテンプレート（繰り返しパターン用）
 model ShiftTemplate {
   id        String   @id @default(cuid())
-  name      String
+  name      String   // 例: "日勤", "夜勤", "準夜勤"
+  shiftType String   // "日勤", "夜勤", "準夜勤", "深夜勤"
   startTime String
   endTime   String
   breakTime Int      @default(60)
+  color     String   @default("#3b82f6")
   createdAt DateTime @default(now())
+}
+
+// 休暇・希望休申請
+model LeaveRequest {
+  id        String   @id @default(cuid())
+  staffId   String
+  staff     Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  startDate DateTime
+  endDate   DateTime
+  type      String   // "有給", "希望休", "特別休暇", "公休"
+  reason    String?
+  status    String   @default("申請中") // "申請中", "承認", "却下"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([staffId])
+  @@index([startDate])
 }

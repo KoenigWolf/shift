@@ -9,6 +9,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from 'date-fns'
 import { ja } from 'date-fns/locale'
 import { ShiftWithStaff } from '@/types'
+import { SHIFT_TYPES } from '@/lib/validations/shift'
 
 interface ShiftCalendarProps {
   shifts: ShiftWithStaff[]
@@ -113,31 +114,50 @@ export function ShiftCalendar({ shifts, onDateSelect }: ShiftCalendarProps) {
                 <p className="text-gray-500 text-sm">シフトがありません</p>
               ) : (
                 <div className="space-y-2">
-                  {selectedDateShifts.map((shift) => (
-                    <div
-                      key={shift.id}
-                      className="flex items-center justify-between p-3 border rounded-lg"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div
-                          className="w-4 h-4 rounded-full"
-                          style={{ backgroundColor: shift.staff.color }}
-                        />
-                        <div>
-                          <div className="font-medium text-sm">{shift.staff.name}</div>
-                          <div className="text-xs text-gray-500">{shift.staff.role}</div>
+                  {selectedDateShifts.map((shift) => {
+                    const shiftTypeConfig = SHIFT_TYPES.find(st => st.value === shift.shiftType)
+                    return (
+                      <div
+                        key={shift.id}
+                        className="p-3 border rounded-lg space-y-2"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div
+                              className="w-4 h-4 rounded-full"
+                              style={{ backgroundColor: shift.staff.color }}
+                            />
+                            <div>
+                              <div className="font-medium text-sm">{shift.staff.name}</div>
+                              <div className="text-xs text-gray-500">{shift.staff.role}</div>
+                            </div>
+                          </div>
+                          <Badge
+                            variant="outline"
+                            style={{
+                              borderColor: shiftTypeConfig?.color,
+                              color: shiftTypeConfig?.color
+                            }}
+                          >
+                            {shiftTypeConfig?.icon} {shift.shiftType}
+                          </Badge>
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm font-medium">
-                          {shift.startTime} - {shift.endTime}
+                        <div className="flex items-center justify-between text-sm">
+                          <div className="font-medium">
+                            {shift.startTime} - {shift.endTime}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            休憩 {shift.breakTime}分
+                          </div>
                         </div>
                         {shift.memo && (
-                          <div className="text-xs text-gray-500">{shift.memo}</div>
+                          <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                            {shift.memo}
+                          </div>
                         )}
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
             </CardContent>

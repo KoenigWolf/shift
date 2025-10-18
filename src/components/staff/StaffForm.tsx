@@ -8,22 +8,16 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { staffSchema, StaffFormData } from '@/lib/validations/staff'
+import { staffSchema, StaffFormData, STAFF_ROLES, QUALIFICATIONS, EMPLOYMENT_TYPES } from '@/lib/validations/staff'
 import { Staff } from '@prisma/client'
 import { toast } from 'sonner'
+import { Switch } from '@/components/ui/switch'
 
 interface StaffFormProps {
   staff?: Staff
   onSuccess: () => void
   onCancel: () => void
 }
-
-const roles = [
-  { value: '正社員', label: '正社員' },
-  { value: 'アルバイト', label: 'アルバイト' },
-  { value: 'パート', label: 'パート' },
-  { value: '契約社員', label: '契約社員' },
-]
 
 const colors = [
   { value: '#3b82f6', label: '青' },
@@ -51,16 +45,29 @@ export function StaffForm({ staff, onSuccess, onCancel }: StaffFormProps) {
       name: staff.name,
       email: staff.email,
       role: staff.role,
+      qualification: staff.qualification || '',
+      employmentType: staff.employmentType,
       color: staff.color,
+      maxConsecutiveDays: staff.maxConsecutiveDays || undefined,
+      maxMonthlyHours: staff.maxMonthlyHours || undefined,
+      maxNightShifts: staff.maxNightShifts || undefined,
+      canWorkNight: staff.canWorkNight,
     } : {
       name: '',
       email: '',
       role: '',
+      qualification: '',
+      employmentType: '常勤',
       color: '#3b82f6',
+      maxConsecutiveDays: undefined,
+      maxMonthlyHours: undefined,
+      maxNightShifts: undefined,
+      canWorkNight: true,
     },
   })
 
   const selectedColor = watch('color')
+  const canWorkNight = watch('canWorkNight')
 
   const onSubmit = async (data: StaffFormData) => {
     setIsSubmitting(true)
@@ -132,7 +139,7 @@ export function StaffForm({ staff, onSuccess, onCancel }: StaffFormProps) {
                 <SelectValue placeholder="役職を選択" />
               </SelectTrigger>
               <SelectContent>
-                {roles.map((role) => (
+                {STAFF_ROLES.map((role) => (
                   <SelectItem key={role.value} value={role.value}>
                     {role.label}
                   </SelectItem>
@@ -142,6 +149,44 @@ export function StaffForm({ staff, onSuccess, onCancel }: StaffFormProps) {
             {errors.role && (
               <p className="text-sm text-red-600">{errors.role.message}</p>
             )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="qualification">資格（任意）</Label>
+            <Select
+              value={watch('qualification') || ''}
+              onValueChange={(value) => setValue('qualification', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="資格を選択" />
+              </SelectTrigger>
+              <SelectContent>
+                {QUALIFICATIONS.map((qual) => (
+                  <SelectItem key={qual.value} value={qual.value}>
+                    {qual.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="employmentType">雇用形態</Label>
+            <Select
+              value={watch('employmentType')}
+              onValueChange={(value) => setValue('employmentType', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="雇用形態を選択" />
+              </SelectTrigger>
+              <SelectContent>
+                {EMPLOYMENT_TYPES.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
@@ -164,6 +209,68 @@ export function StaffForm({ staff, onSuccess, onCancel }: StaffFormProps) {
             {errors.color && (
               <p className="text-sm text-red-600">{errors.color.message}</p>
             )}
+          </div>
+
+          <div className="border-t pt-4 space-y-4">
+            <h3 className="font-semibold text-gray-700">勤務制約設定</h3>
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="canWorkNight">夜勤可能</Label>
+                <p className="text-sm text-gray-500">夜勤シフトへの配置を許可</p>
+              </div>
+              <Switch
+                checked={canWorkNight}
+                onCheckedChange={(checked) => setValue('canWorkNight', checked)}
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="maxConsecutiveDays">最大連続勤務日数</Label>
+                <Input
+                  id="maxConsecutiveDays"
+                  type="number"
+                  min="1"
+                  max="31"
+                  placeholder="例: 5"
+                  {...register('maxConsecutiveDays', { valueAsNumber: true })}
+                />
+                {errors.maxConsecutiveDays && (
+                  <p className="text-sm text-red-600">{errors.maxConsecutiveDays.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="maxMonthlyHours">月間最大勤務時間</Label>
+                <Input
+                  id="maxMonthlyHours"
+                  type="number"
+                  min="1"
+                  max="744"
+                  placeholder="例: 160"
+                  {...register('maxMonthlyHours', { valueAsNumber: true })}
+                />
+                {errors.maxMonthlyHours && (
+                  <p className="text-sm text-red-600">{errors.maxMonthlyHours.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="maxNightShifts">月間最大夜勤回数</Label>
+                <Input
+                  id="maxNightShifts"
+                  type="number"
+                  min="0"
+                  max="31"
+                  placeholder="例: 8"
+                  {...register('maxNightShifts', { valueAsNumber: true })}
+                />
+                {errors.maxNightShifts && (
+                  <p className="text-sm text-red-600">{errors.maxNightShifts.message}</p>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="flex space-x-2">

@@ -1,10 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(vercel ls --scope koenigwolf)",
-      "Bash(vercel ls)",
-      "Bash(npm run build)",
-      "Bash(git commit -m \"$(cat <<''EOF''\nfix: フォーム用と API用のスキーマを分離して型推論エラーを解決\n\n## 問題点\n- z.default()やz.optional()を使うと、zodResolverの型推論で\n  入力型と出力型が一致せず、TypeScriptのコンパイルエラーが発生\n\n## 解決策\n- フォーム用のスキーマ(staffFormSchema, shiftFormSchema)を新規作成\n  - .default()を削除し、すべてのフィールドを明示的に必須化\n  - デフォルト値はフォームのdefaultValuesで設定\n- API用のスキーマ(staffSchema, shiftSchema)は既存のまま保持\n  - z.coerce.date()やz.default()を維持\n  - サーバー側でのデータ受信に使用\n\n## 変更ファイル\n- src/lib/validations/staff.ts: staffFormSchemaを追加\n- src/lib/validations/shift.ts: shiftFormSchemaを追加\n- src/components/staff/StaffForm.tsx: staffFormSchemaを使用\n- src/components/shifts/ShiftForm.tsx: shiftFormSchemaを使用\n- qualification フィールドを undefined から null に変更\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
+      "Bash(git commit -m \"$(cat <<''EOF''\nrefactor: ページタイトル・サブタイトルを整理してスペース効率を改善\n\n## 変更内容\n\n### デザイン統一\n- 全ページのタイトルにグラデーション効果を適用（青→紫）\n- ボタンにシャドウとホバーエフェクトを追加\n- 上下パディングをpy-8からpy-6に削減してスペース効率を向上\n\n### 各ページの整理\n\n**カレンダーページ**\n- 冗長な「カレンダー」タイトルと「シフトのカレンダー表示」サブタイトルを削除\n- ShiftCalendarコンポーネント自体が十分な情報を提供\n\n**シフト作成ページ**\n- サブタイトル「新しいシフトを作成します」を削除\n- グラデーションタイトルのみでシンプルに表示\n\n**スタッフ管理ページ**\n- 「スタッフ一覧」から「スタッフ管理」に変更\n- グラデーションタイトルとシャドウ付きボタンで視覚的品質向上\n\n**レポートページ**\n- タイトルサイズを3xlから2xlに統一\n- グラデーション効果とボタンスタイル改善\n\n## 効果\n- 画面スペースの有効活用\n- 視認性と操作性の両立\n- 統一感のある高品質なデザイン\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

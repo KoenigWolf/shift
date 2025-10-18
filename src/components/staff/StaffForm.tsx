@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { staffSchema, StaffFormData, STAFF_ROLES, QUALIFICATIONS, EMPLOYMENT_TYPES } from '@/lib/validations/staff'
+import { staffFormSchema, StaffFormData, STAFF_ROLES, QUALIFICATIONS, EMPLOYMENT_TYPES } from '@/lib/validations/staff'
 import { Staff } from '@prisma/client'
 import { toast } from 'sonner'
 import { Switch } from '@/components/ui/switch'
@@ -40,7 +40,7 @@ export function StaffForm({ staff, onSuccess, onCancel }: StaffFormProps) {
     watch,
     formState: { errors },
   } = useForm<StaffFormData>({
-    resolver: zodResolver(staffSchema),
+    resolver: zodResolver(staffFormSchema),
     defaultValues: staff ? {
       name: staff.name,
       email: staff.email,
@@ -176,7 +176,7 @@ export function StaffForm({ staff, onSuccess, onCancel }: StaffFormProps) {
             <Label htmlFor="qualification">資格（任意）</Label>
             <Select
               value={watch('qualification') || 'なし'}
-              onValueChange={(value) => setValue('qualification', value === 'なし' ? undefined : value)}
+              onValueChange={(value) => setValue('qualification', value === 'なし' ? null : value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="資格を選択" />

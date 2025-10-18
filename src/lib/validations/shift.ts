@@ -1,8 +1,22 @@
 import { z } from 'zod'
 
+// フォーム用のスキーマ（Dateオブジェクトを使用）
+export const shiftFormSchema = z.object({
+  staffId: z.string().min(1, 'スタッフを選択してください'),
+  date: z.date(),
+  shiftType: z.string().min(1, 'シフトタイプを選択してください'),
+  startTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, '正しい時刻形式で入力してください'),
+  endTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, '正しい時刻形式で入力してください'),
+  breakTime: z.number().min(0).max(480),
+  memo: z.string().optional(),
+  status: z.string().min(1, 'ステータスを選択してください'),
+  isPublished: z.boolean(),
+})
+
+// API用のスキーマ（文字列とDateの両方を受け入れる）
 export const shiftSchema = z.object({
   staffId: z.string().min(1, 'スタッフを選択してください'),
-  date: z.union([z.date(), z.string()]).pipe(z.coerce.date()),
+  date: z.coerce.date(),
   shiftType: z.string().default('日勤'),
   startTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, '正しい時刻形式で入力してください'),
   endTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, '正しい時刻形式で入力してください'),
@@ -12,7 +26,7 @@ export const shiftSchema = z.object({
   isPublished: z.boolean().default(false),
 })
 
-export type ShiftFormData = z.infer<typeof shiftSchema>
+export type ShiftFormData = z.infer<typeof shiftFormSchema>
 
 // シフトタイプの定義
 export const SHIFT_TYPES = [

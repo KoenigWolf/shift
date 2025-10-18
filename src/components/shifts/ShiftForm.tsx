@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { shiftSchema, ShiftFormData, SHIFT_TYPES, SHIFT_STATUSES } from '@/lib/validations/shift'
+import { shiftFormSchema, ShiftFormData, SHIFT_TYPES, SHIFT_STATUSES } from '@/lib/validations/shift'
 import { Staff, Shift } from '@prisma/client'
 import { CalendarIcon, Clock } from 'lucide-react'
 import { toast } from 'sonner'
@@ -36,7 +36,7 @@ export function ShiftForm({ shift, onSuccess, onCancel }: ShiftFormProps) {
     watch,
     formState: { errors },
   } = useForm<ShiftFormData>({
-    resolver: zodResolver(shiftSchema),
+    resolver: zodResolver(shiftFormSchema),
     defaultValues: shift ? {
       staffId: shift.staffId,
       date: new Date(shift.date),

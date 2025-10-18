@@ -1,5 +1,20 @@
 import { z } from 'zod'
 
+// フォーム用のスキーマ
+export const staffFormSchema = z.object({
+  name: z.string().min(1, '名前は必須です'),
+  email: z.string().email('正しいメールアドレスを入力してください'),
+  role: z.string().min(1, '役職は必須です'),
+  qualification: z.string().nullable(),
+  employmentType: z.string().min(1, '雇用形態を選択してください'),
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, '正しい色コードを入力してください'),
+  maxConsecutiveDays: z.number().min(1).max(31).nullable(),
+  maxMonthlyHours: z.number().min(1).max(744).nullable(),
+  maxNightShifts: z.number().min(0).max(31).nullable(),
+  canWorkNight: z.boolean(),
+})
+
+// API用のスキーマ
 export const staffSchema = z.object({
   name: z.string().min(1, '名前は必須です'),
   email: z.string().email('正しいメールアドレスを入力してください'),
@@ -19,7 +34,7 @@ export const staffSchema = z.object({
   qualification: data.qualification || null,
 }))
 
-export type StaffFormData = z.infer<typeof staffSchema>
+export type StaffFormData = z.infer<typeof staffFormSchema>
 
 // 役職の選択肢
 export const STAFF_ROLES = [

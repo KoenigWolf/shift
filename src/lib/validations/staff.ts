@@ -26,7 +26,7 @@ export const STAFF_ROLES = [
 
 // 資格の選択肢
 export const QUALIFICATIONS = [
-  { value: '', label: 'なし' },
+  { value: 'なし', label: 'なし' },
   { value: '認定看護師', label: '認定看護師' },
   { value: '専門看護師', label: '専門看護師' },
   { value: '特定行為研修修了', label: '特定行為研修修了' },

@@ -45,7 +45,7 @@ export function StaffForm({ staff, onSuccess, onCancel }: StaffFormProps) {
       name: staff.name,
       email: staff.email,
       role: staff.role,
-      qualification: staff.qualification || '',
+      qualification: staff.qualification || 'なし',
       employmentType: staff.employmentType,
       color: staff.color,
       maxConsecutiveDays: staff.maxConsecutiveDays || undefined,
@@ -56,7 +56,7 @@ export function StaffForm({ staff, onSuccess, onCancel }: StaffFormProps) {
       name: '',
       email: '',
       role: '',
-      qualification: '',
+      qualification: 'なし',
       employmentType: '常勤',
       color: '#3b82f6',
       maxConsecutiveDays: undefined,
@@ -154,8 +154,8 @@ export function StaffForm({ staff, onSuccess, onCancel }: StaffFormProps) {
           <div className="space-y-2">
             <Label htmlFor="qualification">資格（任意）</Label>
             <Select
-              value={watch('qualification') || ''}
-              onValueChange={(value) => setValue('qualification', value)}
+              value={watch('qualification') || 'なし'}
+              onValueChange={(value) => setValue('qualification', value === 'なし' ? undefined : value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="資格を選択" />

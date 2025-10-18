@@ -43,26 +43,43 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
+    console.log('Received shift data:', body)
+
     const validatedData = shiftSchema.parse(body)
-    
+    console.log('Validated shift data:', validatedData)
+
     const shift = await prisma.shift.create({
       data: validatedData,
       include: {
         staff: true,
       },
     })
-    
+
     return NextResponse.json(shift, { status: 201 })
   } catch (error) {
     console.error('Error creating shift:', error)
-    if (error instanceof Error && error.name === 'ZodError') {
+
+    // Zodエラーの場合
+    if (error && typeof error === 'object' && 'name' in error && error.name === 'ZodError') {
+      console.error('Zod validation error:', JSON.stringify(error, null, 2))
       return NextResponse.json(
-        { error: 'Invalid request data', details: error.message },
+        { error: 'Invalid request data', details: error },
         { status: 400 }
       )
     }
+
+    // Prismaエラーの場合
+    if (error && typeof error === 'object' && 'code' in error) {
+      console.error('Prisma error:', error)
+      return NextResponse.json(
+        { error: 'Database error', details: String(error) },
+        { status: 500 }
+      )
+    }
+
+    // その他のエラー
     return NextResponse.json(
-      { error: 'Failed to create shift' },
+      { error: 'Failed to create shift', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     )
   }

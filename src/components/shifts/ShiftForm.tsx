@@ -99,7 +99,9 @@ export function ShiftForm({ shift, onSuccess, onCancel }: ShiftFormProps) {
     try {
       const url = shift ? `/api/shifts/${shift.id}` : '/api/shifts'
       const method = shift ? 'PUT' : 'POST'
-      
+
+      console.log('Submitting shift data:', data)
+
       const response = await fetch(url, {
         method,
         headers: {
@@ -109,13 +111,26 @@ export function ShiftForm({ shift, onSuccess, onCancel }: ShiftFormProps) {
       })
 
       if (!response.ok) {
-        throw new Error('保存に失敗しました')
+        const errorText = await response.text()
+        console.error('API Error Response:', errorText)
+
+        let errorData
+        try {
+          errorData = JSON.parse(errorText)
+        } catch {
+          errorData = { error: errorText }
+        }
+
+        console.error('API Error:', errorData)
+        const errorMessage = errorData.error || errorData.details || '保存に失敗しました'
+        throw new Error(errorMessage)
       }
 
       toast.success(shift ? 'シフトを更新しました' : 'シフトを作成しました')
       onSuccess()
     } catch (error) {
-      toast.error('エラーが発生しました')
+      const errorMessage = error instanceof Error ? error.message : 'エラーが発生しました'
+      toast.error(errorMessage)
       console.error('Error:', error)
     } finally {
       setIsSubmitting(false)

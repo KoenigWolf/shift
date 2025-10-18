@@ -7,7 +7,9 @@
       "Bash(npx prisma generate)",
       "Bash(npx prisma db push)",
       "Bash(cat node_modules/.prisma/client/index.d.ts)",
-      "Bash(git add -A)"
+      "Bash(git add -A)",
+      "Bash(git commit -m \"chore: Update Claude settings\")",
+      "Bash(npm install)"
     ],
     "deny": [],
     "ask": []

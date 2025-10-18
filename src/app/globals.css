@@ -119,4 +119,124 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* カスタムアニメーション */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scaleUp {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+}
+
+@layer components {
+  /* グラデーションテキスト */
+  .gradient-text {
+    @apply bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent;
+  }
+
+  /* グラデーション背景 */
+  .gradient-bg {
+    @apply bg-gradient-to-br from-blue-500 to-purple-600;
+  }
+
+  /* グラデーションホバー効果 */
+  .gradient-hover {
+    @apply transition-all duration-200 hover:shadow-lg hover:scale-[1.02];
+  }
+
+  /* カードの統一スタイル */
+  .card-elevated {
+    @apply bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200;
+  }
+
+  /* ボタンの統一スタイル */
+  .btn-gradient {
+    @apply bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md hover:shadow-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200;
+  }
+
+  /* フォーカススタイル */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+  }
+
+  /* アニメーションクラス */
+  .animate-fade-in {
+    animation: fadeIn 200ms ease-in;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 300ms ease-out;
+  }
+
+  .animate-scale-up {
+    animation: scaleUp 200ms ease-out;
+  }
+
+  .animate-shimmer {
+    animation: shimmer 2s infinite;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    background-size: 200% 100%;
+  }
+}
+
+@layer utilities {
+  /* スペーシングユーティリティ */
+  .space-compact {
+    @apply space-y-4;
+  }
+
+  .space-normal {
+    @apply space-y-6;
+  }
+
+  .space-relaxed {
+    @apply space-y-8;
+  }
+
+  /* トランジションユーティリティ */
+  .transition-fast {
+    @apply transition-all duration-150 ease-in-out;
+  }
+
+  .transition-normal {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  .transition-slow {
+    @apply transition-all duration-300 ease-in-out;
+  }
 }

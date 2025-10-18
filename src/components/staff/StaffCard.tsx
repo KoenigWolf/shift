@@ -53,21 +53,27 @@ export function StaffCard({ staff, onUpdate, onDelete }: StaffCardProps) {
   }
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="card-elevated animate-slide-up group">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div
-              className="w-4 h-4 rounded-full"
+              className="w-10 h-10 rounded-full shadow-md flex items-center justify-center text-white font-bold text-sm transition-transform group-hover:scale-110 duration-200"
               style={{ backgroundColor: staff.color }}
-            />
-            <CardTitle className="text-lg">{staff.name}</CardTitle>
+            >
+              {staff.name.charAt(0)}
+            </div>
+            <div>
+              <CardTitle className="text-lg font-semibold">{staff.name}</CardTitle>
+              <Badge variant="secondary" className="mt-1">{staff.role}</Badge>
+            </div>
           </div>
-          <div className="flex space-x-2">
+          <div className="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <Button
               size="sm"
               variant="outline"
               onClick={() => setIsEditing(true)}
+              className="hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-colors"
             >
               <Edit className="h-4 w-4" />
             </Button>
@@ -76,6 +82,7 @@ export function StaffCard({ staff, onUpdate, onDelete }: StaffCardProps) {
               variant="outline"
               onClick={handleDelete}
               disabled={isDeleting}
+              className="hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-colors"
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -83,15 +90,22 @@ export function StaffCard({ staff, onUpdate, onDelete }: StaffCardProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <Mail className="h-4 w-4 text-gray-500" />
-            <span className="text-sm text-gray-600">{staff.email}</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Badge variant="secondary">{staff.role}</Badge>
-          </div>
+        <div className="flex items-center space-x-2 text-gray-600">
+          <Mail className="h-4 w-4 text-gray-400" />
+          <span className="text-sm">{staff.email}</span>
         </div>
+        {staff.qualification && (
+          <div className="mt-2 text-xs text-gray-500">
+            資格: {staff.qualification}
+          </div>
+        )}
+        {staff.canWorkNight && (
+          <div className="mt-2">
+            <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
+              夜勤可能
+            </Badge>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

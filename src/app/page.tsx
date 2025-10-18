@@ -93,66 +93,76 @@ export default function DashboardPage() {
         <div className="space-y-6">
           {/* 統計カード */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-            <Card>
+            <Card className="card-elevated animate-fade-in border-l-4 border-l-blue-500" style={{ animationDelay: '0ms' }}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">看護師数</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium text-gray-600">看護師数</CardTitle>
+                <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                  <Users className="h-5 w-5 text-blue-600" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{staff.length}</div>
-                <p className="text-xs text-muted-foreground">
+                <div className="text-3xl font-bold gradient-text">{staff.length}</div>
+                <p className="text-xs text-gray-500 mt-1">
                   登録済み看護師
                 </p>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="card-elevated animate-fade-in border-l-4 border-l-yellow-500" style={{ animationDelay: '50ms' }}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">今日の日勤</CardTitle>
-                <Sun className="h-4 w-4 text-yellow-500" />
+                <CardTitle className="text-sm font-medium text-gray-600">今日の日勤</CardTitle>
+                <div className="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center">
+                  <Sun className="h-5 w-5 text-yellow-600" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{todayDayShifts.length}</div>
-                <p className="text-xs text-muted-foreground">
+                <div className="text-3xl font-bold text-yellow-600">{todayDayShifts.length}</div>
+                <p className="text-xs text-gray-500 mt-1">
                   日勤スタッフ数
                 </p>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="card-elevated animate-fade-in border-l-4 border-l-purple-500" style={{ animationDelay: '100ms' }}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">今日の夜勤</CardTitle>
-                <Moon className="h-4 w-4 text-purple-500" />
+                <CardTitle className="text-sm font-medium text-gray-600">今日の夜勤</CardTitle>
+                <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
+                  <Moon className="h-5 w-5 text-purple-600" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{todayNightShifts.length}</div>
-                <p className="text-xs text-muted-foreground">
+                <div className="text-3xl font-bold text-purple-600">{todayNightShifts.length}</div>
+                <p className="text-xs text-gray-500 mt-1">
                   夜勤スタッフ数
                 </p>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="card-elevated animate-fade-in border-l-4 border-l-green-500" style={{ animationDelay: '150ms' }}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">今週のシフト</CardTitle>
-                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium text-gray-600">今週のシフト</CardTitle>
+                <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+                  <Calendar className="h-5 w-5 text-green-600" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{thisWeekShifts.length}</div>
-                <p className="text-xs text-muted-foreground">
+                <div className="text-3xl font-bold text-green-600">{thisWeekShifts.length}</div>
+                <p className="text-xs text-gray-500 mt-1">
                   今週の予定
                 </p>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="card-elevated animate-fade-in border-l-4 border-l-indigo-500" style={{ animationDelay: '200ms' }}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">総シフト数</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium text-gray-600">総シフト数</CardTitle>
+                <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center">
+                  <TrendingUp className="h-5 w-5 text-indigo-600" />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{shifts.length}</div>
-                <p className="text-xs text-muted-foreground">
+                <div className="text-3xl font-bold text-indigo-600">{shifts.length}</div>
+                <p className="text-xs text-gray-500 mt-1">
                   全期間のシフト
                 </p>
               </CardContent>

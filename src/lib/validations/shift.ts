@@ -2,9 +2,7 @@ import { z } from 'zod'
 
 export const shiftSchema = z.object({
   staffId: z.string().min(1, 'スタッフを選択してください'),
-  date: z.union([z.date(), z.string()]).transform((val) =>
-    typeof val === 'string' ? new Date(val) : val
-  ),
+  date: z.union([z.date(), z.string()]).pipe(z.coerce.date()),
   shiftType: z.string().default('日勤'),
   startTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, '正しい時刻形式で入力してください'),
   endTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, '正しい時刻形式で入力してください'),

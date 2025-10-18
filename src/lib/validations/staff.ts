@@ -4,14 +4,20 @@ export const staffSchema = z.object({
   name: z.string().min(1, '名前は必須です'),
   email: z.string().email('正しいメールアドレスを入力してください'),
   role: z.string().min(1, '役職は必須です'),
-  qualification: z.string().optional(),
+  qualification: z.string().optional().nullable(),
   employmentType: z.string().default('常勤'),
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, '正しい色コードを入力してください'),
-  maxConsecutiveDays: z.number().min(1).max(31).optional(),
-  maxMonthlyHours: z.number().min(1).max(744).optional(),
-  maxNightShifts: z.number().min(0).max(31).optional(),
+  maxConsecutiveDays: z.number().min(1).max(31).optional().nullable(),
+  maxMonthlyHours: z.number().min(1).max(744).optional().nullable(),
+  maxNightShifts: z.number().min(0).max(31).optional().nullable(),
   canWorkNight: z.boolean().default(true),
-})
+}).transform((data) => ({
+  ...data,
+  maxConsecutiveDays: data.maxConsecutiveDays || null,
+  maxMonthlyHours: data.maxMonthlyHours || null,
+  maxNightShifts: data.maxNightShifts || null,
+  qualification: data.qualification || null,
+}))
 
 export type StaffFormData = z.infer<typeof staffSchema>
 

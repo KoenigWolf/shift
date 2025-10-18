@@ -48,9 +48,9 @@ export function StaffForm({ staff, onSuccess, onCancel }: StaffFormProps) {
       qualification: staff.qualification || 'なし',
       employmentType: staff.employmentType,
       color: staff.color,
-      maxConsecutiveDays: staff.maxConsecutiveDays || undefined,
-      maxMonthlyHours: staff.maxMonthlyHours || undefined,
-      maxNightShifts: staff.maxNightShifts || undefined,
+      maxConsecutiveDays: staff.maxConsecutiveDays ?? null,
+      maxMonthlyHours: staff.maxMonthlyHours ?? null,
+      maxNightShifts: staff.maxNightShifts ?? null,
       canWorkNight: staff.canWorkNight,
     } : {
       name: '',
@@ -59,9 +59,9 @@ export function StaffForm({ staff, onSuccess, onCancel }: StaffFormProps) {
       qualification: 'なし',
       employmentType: '常勤',
       color: '#3b82f6',
-      maxConsecutiveDays: undefined,
-      maxMonthlyHours: undefined,
-      maxNightShifts: undefined,
+      maxConsecutiveDays: null,
+      maxMonthlyHours: null,
+      maxNightShifts: null,
       canWorkNight: true,
     },
   })
@@ -74,23 +74,31 @@ export function StaffForm({ staff, onSuccess, onCancel }: StaffFormProps) {
     try {
       const url = staff ? `/api/staff/${staff.id}` : '/api/staff'
       const method = staff ? 'PUT' : 'POST'
-      
+
+      // 資格が'なし'の場合はundefinedに変換
+      const submitData = {
+        ...data,
+        qualification: data.qualification === 'なし' ? undefined : data.qualification,
+      }
+
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(submitData),
       })
 
       if (!response.ok) {
-        throw new Error('保存に失敗しました')
+        const errorData = await response.json()
+        console.error('API Error:', errorData)
+        throw new Error(errorData.error || '保存に失敗しました')
       }
 
       toast.success(staff ? 'スタッフを更新しました' : 'スタッフを登録しました')
       onSuccess()
     } catch (error) {
-      toast.error('エラーが発生しました')
+      toast.error(error instanceof Error ? error.message : 'エラーが発生しました')
       console.error('Error:', error)
     } finally {
       setIsSubmitting(false)
@@ -234,7 +242,9 @@ export function StaffForm({ staff, onSuccess, onCancel }: StaffFormProps) {
                   min="1"
                   max="31"
                   placeholder="例: 5"
-                  {...register('maxConsecutiveDays', { valueAsNumber: true })}
+                  {...register('maxConsecutiveDays', {
+                    setValueAs: (v) => v === '' || v === null ? null : Number(v)
+                  })}
                 />
                 {errors.maxConsecutiveDays && (
                   <p className="text-sm text-red-600">{errors.maxConsecutiveDays.message}</p>
@@ -249,7 +259,9 @@ export function StaffForm({ staff, onSuccess, onCancel }: StaffFormProps) {
                   min="1"
                   max="744"
                   placeholder="例: 160"
-                  {...register('maxMonthlyHours', { valueAsNumber: true })}
+                  {...register('maxMonthlyHours', {
+                    setValueAs: (v) => v === '' || v === null ? null : Number(v)
+                  })}
                 />
                 {errors.maxMonthlyHours && (
                   <p className="text-sm text-red-600">{errors.maxMonthlyHours.message}</p>
@@ -264,7 +276,9 @@ export function StaffForm({ staff, onSuccess, onCancel }: StaffFormProps) {
                   min="0"
                   max="31"
                   placeholder="例: 8"
-                  {...register('maxNightShifts', { valueAsNumber: true })}
+                  {...register('maxNightShifts', {
+                    setValueAs: (v) => v === '' || v === null ? null : Number(v)
+                  })}
                 />
                 {errors.maxNightShifts && (
                   <p className="text-sm text-red-600">{errors.maxNightShifts.message}</p>

@@ -77,11 +77,13 @@ export default function ReportsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-6">
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-gray-900">勤務実績レポート</h1>
-            <Button variant="outline">
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              勤務実績レポート
+            </h1>
+            <Button variant="outline" className="shadow-md hover:shadow-lg transition-shadow">
               <Download className="h-4 w-4 mr-2" />
               Excel出力
             </Button>

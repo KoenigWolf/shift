@@ -46,8 +46,10 @@ export function StaffList() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">スタッフ一覧</h2>
-        <Button onClick={() => setShowForm(true)}>
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          スタッフ管理
+        </h1>
+        <Button onClick={() => setShowForm(true)} className="shadow-md hover:shadow-lg transition-shadow">
           <Plus className="h-4 w-4 mr-2" />
           新規登録
         </Button>

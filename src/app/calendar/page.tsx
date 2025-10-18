@@ -42,15 +42,8 @@ export default function CalendarPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <main className="container mx-auto px-4 py-8">
-        <div className="space-y-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">カレンダー</h1>
-            <p className="text-gray-600">シフトのカレンダー表示</p>
-          </div>
-          
-          <ShiftCalendar shifts={shifts} />
-        </div>
+      <main className="container mx-auto px-4 py-6">
+        <ShiftCalendar shifts={shifts} />
       </main>
     </div>
   )

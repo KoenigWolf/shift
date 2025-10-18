@@ -3,7 +3,8 @@
     "allow": [
       "Bash(vercel ls --scope koenigwolf)",
       "Bash(vercel ls)",
-      "Bash(npm run build)"
+      "Bash(npm run build)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfix: フォーム用と API用のスキーマを分離して型推論エラーを解決\n\n## 問題点\n- z.default()やz.optional()を使うと、zodResolverの型推論で\n  入力型と出力型が一致せず、TypeScriptのコンパイルエラーが発生\n\n## 解決策\n- フォーム用のスキーマ(staffFormSchema, shiftFormSchema)を新規作成\n  - .default()を削除し、すべてのフィールドを明示的に必須化\n  - デフォルト値はフォームのdefaultValuesで設定\n- API用のスキーマ(staffSchema, shiftSchema)は既存のまま保持\n  - z.coerce.date()やz.default()を維持\n  - サーバー側でのデータ受信に使用\n\n## 変更ファイル\n- src/lib/validations/staff.ts: staffFormSchemaを追加\n- src/lib/validations/shift.ts: shiftFormSchemaを追加\n- src/components/staff/StaffForm.tsx: staffFormSchemaを使用\n- src/components/shifts/ShiftForm.tsx: shiftFormSchemaを使用\n- qualification フィールドを undefined から null に変更\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

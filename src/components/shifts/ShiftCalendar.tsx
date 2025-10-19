@@ -10,6 +10,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, getDay,
 import { ja } from 'date-fns/locale'
 import { ShiftWithStaff } from '@/types'
 import { SHIFT_TYPES } from '@/lib/validations/shift'
+import { CompactStatCard, CardHeaderWithIcon } from '@/components/common'
 
 interface ShiftCalendarProps {
   shifts: ShiftWithStaff[]
@@ -71,101 +72,58 @@ export function ShiftCalendar({ shifts, onDateSelect }: ShiftCalendarProps) {
   const stats = getShiftStats()
 
   return (
-    <div className="space-y-6">
-      {/* ヘッダーセクション */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex items-center gap-4">
+    <div className="space-y-4">
+      {/* コンパクトヘッダー */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex items-center gap-3">
           <div>
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <h2 className="text-xl font-bold text-gray-800">
               {format(currentMonth, 'yyyy年 M月', { locale: ja })}
             </h2>
-            <p className="text-sm text-gray-500 mt-1">
-              {format(selectedDate, 'M月d日 (E)', { locale: ja })} のシフト詳細
+            <p className="text-xs text-gray-500 mt-0.5">
+              {format(selectedDate, 'M月d日 (E)', { locale: ja })} のシフト
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={goToToday}>
-            <Clock className="h-4 w-4 mr-2" />
+          <Button variant="outline" size="sm" onClick={goToToday} className="h-8 text-xs">
+            <Clock className="h-3.5 w-3.5 mr-1.5" />
             今日
           </Button>
           <div className="flex items-center border rounded-lg">
-            <Button variant="ghost" size="sm" onClick={goToPreviousMonth} className="rounded-r-none">
+            <Button variant="ghost" size="sm" onClick={goToPreviousMonth} className="rounded-r-none h-8 px-2">
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <div className="px-3 py-1 text-sm font-medium border-x">
+            <div className="px-2.5 py-1 text-xs font-medium border-x">
               {format(currentMonth, 'M月', { locale: ja })}
             </div>
-            <Button variant="ghost" size="sm" onClick={goToNextMonth} className="rounded-l-none">
+            <Button variant="ghost" size="sm" onClick={goToNextMonth} className="rounded-l-none h-8 px-2">
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
       </div>
 
-      {/* 統計カード */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="border-l-4 border-l-blue-500 hover:shadow-lg transition-shadow">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-600">今日の勤務</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{stats.todayTotal}</p>
-              </div>
-              <Users className="h-8 w-8 text-blue-500 opacity-80" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-l-4 border-l-yellow-500 hover:shadow-lg transition-shadow">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-600">日勤</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{stats.dayShifts}</p>
-              </div>
-              <Sun className="h-8 w-8 text-yellow-500 opacity-80" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-l-4 border-l-purple-500 hover:shadow-lg transition-shadow">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-600">夜勤</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{stats.nightShifts}</p>
-              </div>
-              <Moon className="h-8 w-8 text-purple-500 opacity-80" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-l-4 border-l-orange-500 hover:shadow-lg transition-shadow">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-600">今月合計</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{stats.monthTotal}</p>
-              </div>
-              <Clock className="h-8 w-8 text-orange-500 opacity-80" />
-            </div>
-          </CardContent>
-        </Card>
+      {/* コンパクトな統計カード */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <CompactStatCard title="今日の勤務" value={stats.todayTotal} icon={Users} color="blue" />
+        <CompactStatCard title="日勤" value={stats.dayShifts} icon={Sun} color="yellow" />
+        <CompactStatCard title="夜勤" value={stats.nightShifts} icon={Moon} color="purple" />
+        <CompactStatCard title="今月合計" value={stats.monthTotal} icon={Clock} color="orange" />
       </div>
 
       {/* カレンダーグリッド */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         <div className="xl:col-span-2">
-          <Card className="overflow-hidden shadow-lg">
+          <Card className="overflow-hidden shadow-lg border-0">
             <CardContent className="p-0">
               {/* 曜日ヘッダー */}
               <div className="grid grid-cols-7 bg-gradient-to-r from-gray-50 to-gray-100 border-b">
                 {['日', '月', '火', '水', '木', '金', '土'].map((day, index) => (
                   <div
                     key={day}
-                    className={`text-center text-xs font-semibold p-3 ${
+                    className={`text-center text-xs font-semibold p-2 ${
                       index === 0 ? 'text-red-600' : index === 6 ? 'text-blue-600' : 'text-gray-700'
                     }`}
                   >
@@ -174,7 +132,7 @@ export function ShiftCalendar({ shifts, onDateSelect }: ShiftCalendarProps) {
                 ))}
               </div>
 
-              {/* カレンダーグリッド */}
+              {/* カレンダーグリッド - コンパクト版 */}
               <div className="grid grid-cols-7 auto-rows-fr">
                 {calendarDays.map((day, index) => {
                   const dayShifts = getShiftsForDate(day)
@@ -192,7 +150,7 @@ export function ShiftCalendar({ shifts, onDateSelect }: ShiftCalendarProps) {
                       key={day.toISOString()}
                       onClick={() => handleDateClick(day)}
                       className={`
-                        relative p-2 min-h-[100px] border-r border-b transition-all duration-200
+                        relative p-1.5 min-h-[80px] border-r border-b transition-all duration-200
                         ${!isCurrentMonth ? 'bg-gray-50/50 text-gray-400' : 'bg-white hover:bg-blue-50/30'}
                         ${isSelected ? 'bg-blue-50 ring-2 ring-blue-500 ring-inset z-10' : ''}
                         ${isToday ? 'bg-yellow-50/50' : ''}
@@ -200,10 +158,10 @@ export function ShiftCalendar({ shifts, onDateSelect }: ShiftCalendarProps) {
                       `}
                     >
                       {/* 日付 */}
-                      <div className="flex justify-between items-start mb-2">
+                      <div className="flex justify-between items-start mb-1">
                         <span
                           className={`
-                            text-sm font-semibold inline-flex items-center justify-center w-7 h-7 rounded-full
+                            text-xs font-semibold inline-flex items-center justify-center w-6 h-6 rounded-full
                             ${isToday ? 'bg-blue-600 text-white' : ''}
                             ${dayOfWeek === 0 && !isToday ? 'text-red-600' : ''}
                             ${dayOfWeek === 6 && !isToday ? 'text-blue-600' : ''}
@@ -213,30 +171,30 @@ export function ShiftCalendar({ shifts, onDateSelect }: ShiftCalendarProps) {
                           {format(day, 'd')}
                         </span>
                         {dayShifts.length > 0 && (
-                          <span className="text-xs font-bold text-blue-600 bg-blue-100 px-1.5 py-0.5 rounded-full">
+                          <span className="text-[10px] font-bold text-blue-600 bg-blue-100 px-1 py-0.5 rounded-full">
                             {dayShifts.length}
                           </span>
                         )}
                       </div>
 
-                      {/* シフトインジケーター */}
-                      <div className="space-y-1">
+                      {/* シフトインジケーター - コンパクト版 */}
+                      <div className="space-y-0.5">
                         {dayShiftCount > 0 && (
-                          <div className="flex items-center gap-1 text-xs">
-                            <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
-                            <span className="text-gray-700 font-medium">日勤 {dayShiftCount}</span>
+                          <div className="flex items-center gap-1 text-[10px]">
+                            <div className="w-1.5 h-1.5 rounded-full bg-yellow-400"></div>
+                            <span className="text-gray-700 font-medium">日 {dayShiftCount}</span>
                           </div>
                         )}
                         {eveningShiftCount > 0 && (
-                          <div className="flex items-center gap-1 text-xs">
-                            <div className="w-2 h-2 rounded-full bg-orange-400"></div>
-                            <span className="text-gray-700 font-medium">準夜 {eveningShiftCount}</span>
+                          <div className="flex items-center gap-1 text-[10px]">
+                            <div className="w-1.5 h-1.5 rounded-full bg-orange-400"></div>
+                            <span className="text-gray-700 font-medium">準 {eveningShiftCount}</span>
                           </div>
                         )}
                         {nightShiftCount > 0 && (
-                          <div className="flex items-center gap-1 text-xs">
-                            <div className="w-2 h-2 rounded-full bg-purple-400"></div>
-                            <span className="text-gray-700 font-medium">夜勤 {nightShiftCount}</span>
+                          <div className="flex items-center gap-1 text-[10px]">
+                            <div className="w-1.5 h-1.5 rounded-full bg-purple-400"></div>
+                            <span className="text-gray-700 font-medium">夜 {nightShiftCount}</span>
                           </div>
                         )}
                       </div>
@@ -248,115 +206,115 @@ export function ShiftCalendar({ shifts, onDateSelect }: ShiftCalendarProps) {
           </Card>
         </div>
 
-        {/* シフト詳細パネル */}
+        {/* シフト詳細パネル - コンパクト版 */}
         <div className="xl:col-span-1">
-          <Card className="sticky top-4 shadow-lg">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg font-bold">
-                  {format(selectedDate, 'M月d日', { locale: ja })}
-                </CardTitle>
-                <Badge variant="outline" className="text-xs">
+          <Card className="sticky top-4 shadow-lg border-0">
+            <CardHeaderWithIcon
+              title={format(selectedDate, 'M月d日', { locale: ja })}
+              subtitle={`${selectedDateShifts.length}件のシフト`}
+              icon={Calendar}
+              gradient="from-blue-400 to-blue-600"
+              actions={
+                <Badge variant="outline" className="text-xs h-5">
                   {format(selectedDate, '(E)', { locale: ja })}
                 </Badge>
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                {selectedDateShifts.length}件のシフト
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-3 max-h-[600px] overflow-y-auto">
-              {selectedDateShifts.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Clock className="h-8 w-8 text-gray-400" />
-                  </div>
-                  <p className="text-sm text-gray-500">シフトがありません</p>
-                </div>
-              ) : (
-                selectedDateShifts.map((shift) => {
-                  const shiftTypeConfig = SHIFT_TYPES.find(st => st.value === shift.shiftType)
-                  return (
-                    <div
-                      key={shift.id}
-                      className="group p-4 border rounded-xl hover:shadow-md transition-all duration-200 bg-gradient-to-br from-white to-gray-50"
-                    >
-                      {/* スタッフ情報 */}
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-lg"
-                            style={{ backgroundColor: shift.staff.color }}
-                          >
-                            {shift.staff.name.charAt(0)}
-                          </div>
-                          <div>
-                            <div className="font-semibold text-gray-900">{shift.staff.name}</div>
-                            <div className="text-xs text-gray-500">{shift.staff.role}</div>
-                          </div>
-                        </div>
-                        <Badge
-                          className="text-xs font-semibold"
-                          style={{
-                            backgroundColor: `${shiftTypeConfig?.color}20`,
-                            color: shiftTypeConfig?.color,
-                            borderColor: shiftTypeConfig?.color
-                          }}
-                        >
-                          {shiftTypeConfig?.icon} {shift.shiftType}
-                        </Badge>
-                      </div>
-
-                      {/* 時間情報 */}
-                      <div className="flex items-center gap-4 text-sm mb-2">
-                        <div className="flex items-center gap-2 flex-1">
-                          <Clock className="h-4 w-4 text-gray-400" />
-                          <span className="font-medium text-gray-900">
-                            {shift.startTime} - {shift.endTime}
-                          </span>
-                        </div>
-                        <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                          休憩 {shift.breakTime}分
-                        </div>
-                      </div>
-
-                      {/* メモ */}
-                      {shift.memo && (
-                        <div className="mt-3 pt-3 border-t">
-                          <p className="text-xs text-gray-600 leading-relaxed">
-                            {shift.memo}
-                          </p>
-                        </div>
-                      )}
+              }
+            />
+            <div className="px-4 pb-4">
+              <div className="space-y-2 max-h-[550px] overflow-y-auto">
+                {selectedDateShifts.length === 0 ? (
+                  <div className="text-center py-8">
+                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <Clock className="h-6 w-6 text-gray-400" />
                     </div>
-                  )
-                })
-              )}
-            </CardContent>
+                    <p className="text-xs text-gray-500">シフトがありません</p>
+                  </div>
+                ) : (
+                  selectedDateShifts.map((shift) => {
+                    const shiftTypeConfig = SHIFT_TYPES.find(st => st.value === shift.shiftType)
+                    return (
+                      <div
+                        key={shift.id}
+                        className="group p-3 border rounded-lg hover:shadow-md transition-all duration-200 bg-white"
+                      >
+                        {/* スタッフ情報 */}
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-md"
+                              style={{ backgroundColor: shift.staff.color }}
+                            >
+                              {shift.staff.name.charAt(0)}
+                            </div>
+                            <div>
+                              <div className="font-semibold text-gray-900 text-sm">{shift.staff.name}</div>
+                              <div className="text-[10px] text-gray-500">{shift.staff.role}</div>
+                            </div>
+                          </div>
+                          <Badge
+                            className="text-[10px] h-5 px-2 font-semibold"
+                            style={{
+                              backgroundColor: `${shiftTypeConfig?.color}20`,
+                              color: shiftTypeConfig?.color,
+                              borderColor: shiftTypeConfig?.color
+                            }}
+                          >
+                            {shiftTypeConfig?.icon} {shift.shiftType}
+                          </Badge>
+                        </div>
+
+                        {/* 時間情報 */}
+                        <div className="flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-1.5">
+                            <Clock className="h-3 w-3 text-gray-400" />
+                            <span className="font-medium text-gray-900">
+                              {shift.startTime} - {shift.endTime}
+                            </span>
+                          </div>
+                          <div className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+                            休憩 {shift.breakTime}分
+                          </div>
+                        </div>
+
+                        {/* メモ */}
+                        {shift.memo && (
+                          <div className="mt-2 pt-2 border-t">
+                            <p className="text-[10px] text-gray-600 leading-relaxed">
+                              {shift.memo}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })
+                )}
+              </div>
+            </div>
           </Card>
         </div>
       </div>
 
-      {/* レジェンド */}
-      <Card className="bg-gradient-to-r from-gray-50 to-gray-100">
-        <CardContent className="p-4">
-          <div className="flex flex-wrap items-center gap-6">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-              <span className="text-sm font-medium text-gray-700">日勤</span>
+      {/* コンパクトなレジェンド */}
+      <Card className="bg-gradient-to-r from-gray-50 to-gray-100 border-0">
+        <CardContent className="p-3">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
+              <span className="text-xs font-medium text-gray-700">日勤</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-orange-400"></div>
-              <span className="text-sm font-medium text-gray-700">準夜勤</span>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-orange-400"></div>
+              <span className="text-xs font-medium text-gray-700">準夜勤</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-purple-400"></div>
-              <span className="text-sm font-medium text-gray-700">夜勤・深夜勤</span>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-purple-400"></div>
+              <span className="text-xs font-medium text-gray-700">夜勤・深夜勤</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center font-bold">
+            <div className="flex items-center gap-1.5">
+              <div className="w-6 h-6 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center font-bold">
                 {format(new Date(), 'd')}
               </div>
-              <span className="text-sm font-medium text-gray-700">今日</span>
+              <span className="text-xs font-medium text-gray-700">今日</span>
             </div>
           </div>
         </CardContent>

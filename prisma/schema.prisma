@@ -22,6 +22,9 @@ model Staff {
   canWorkNight          Boolean             @default(true) // 夜勤可能か
   shifts                Shift[]
   leaveRequests         LeaveRequest[]
+  shiftPreferences      ShiftPreference[]
+  availabilities        Availability[]
+  notifications         Notification[]
   createdAt             DateTime            @default(now())
   updatedAt             DateTime            @updatedAt
 }
@@ -74,4 +77,78 @@ model LeaveRequest {
 
   @@index([staffId])
   @@index([startDate])
+}
+
+// シフト希望（スタッフが希望するシフトタイプと時間帯）
+model ShiftPreference {
+  id              String   @id @default(cuid())
+  staffId         String
+  staff           Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  targetMonth     DateTime // 対象月（yyyy-MM-01形式）
+  preferredShifts String   // JSON配列: ["日勤", "夜勤"]など
+  notPreferred    String?  // JSON配列: 希望しないシフトタイプ
+  maxDaysPerWeek  Int?     // 週あたり最大勤務日数
+  comment         String?  // コメント・要望
+  submittedAt     DateTime @default(now())
+  status          String   @default("提出済み") // "下書き", "提出済み", "確認済み"
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([staffId])
+  @@index([targetMonth])
+  @@index([status])
+}
+
+// 勤務可能日時（スタッフの空き時間・希望勤務日）
+model Availability {
+  id          String   @id @default(cuid())
+  staffId     String
+  staff       Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  date        DateTime // 対象日
+  isAvailable Boolean  @default(true) // 勤務可能か
+  preferredShiftTypes String? // JSON配列: その日に希望するシフトタイプ
+  unavailableReason   String? // 不可理由: "私用", "通院", "学校行事"など
+  priority    Int      @default(50) // 優先度 0-100（高いほど希望が強い）
+  comment     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([staffId, date])
+  @@index([staffId])
+  @@index([date])
+  @@index([isAvailable])
+}
+
+// 通知システム
+model Notification {
+  id        String   @id @default(cuid())
+  staffId   String
+  staff     Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  type      String   // "シフト確定", "希望提出依頼", "シフト変更", "承認依頼"
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  link      String?  // 関連ページへのリンク
+  createdAt DateTime @default(now())
+
+  @@index([staffId])
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+// シフト自動生成設定
+model ShiftGenerationConfig {
+  id                    String   @id @default(cuid())
+  targetMonth           DateTime // 対象月
+  minStaffPerShift      Int      @default(3) // シフトごとの最小人数
+  maxStaffPerShift      Int      @default(8) // シフトごとの最大人数
+  prioritizePreferences Boolean  @default(true) // 希望を優先するか
+  balanceWorkload       Boolean  @default(true) // 業務負荷を均等化するか
+  lastGeneratedAt       DateTime?
+  status                String   @default("未生成") // "未生成", "生成中", "完了", "エラー"
+  resultSummary         String?  // JSON: 生成結果サマリー
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([targetMonth])
 }

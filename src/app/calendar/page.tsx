@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Header } from '@/components/layout/Header'
 import { ShiftCalendar } from '@/components/shifts/ShiftCalendar'
 import { LoadingSpinner } from '@/components/common/LoadingSpinner'
 import { ShiftWithStaff } from '@/types'
@@ -15,8 +14,8 @@ export default function CalendarPage() {
       try {
         const response = await fetch('/api/shifts')
         if (response.ok) {
-          const data = await response.json()
-          setShifts(data)
+          const result = await response.json()
+          setShifts(result.success ? result.data : [])
         }
       } catch (error) {
         console.error('Error fetching shifts:', error)
@@ -30,21 +29,15 @@ export default function CalendarPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <main className="container mx-auto px-4 py-8">
-          <LoadingSpinner />
-        </main>
-      </div>
+      <main className="container mx-auto px-4 py-4 max-w-[1600px]">
+        <LoadingSpinner />
+      </main>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <main className="container mx-auto px-4 py-6">
-        <ShiftCalendar shifts={shifts} />
-      </main>
-    </div>
+    <main className="container mx-auto px-4 py-4 max-w-[1600px]">
+      <ShiftCalendar shifts={shifts} />
+    </main>
   )
 }

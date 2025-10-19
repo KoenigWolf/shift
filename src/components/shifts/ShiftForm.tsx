@@ -69,8 +69,8 @@ export function ShiftForm({ shift, onSuccess, onCancel }: ShiftFormProps) {
       try {
         const response = await fetch('/api/staff')
         if (response.ok) {
-          const data = await response.json()
-          setStaff(data)
+          const result = await response.json()
+          setStaff(result.success ? result.data : [])
         }
       } catch (error) {
         console.error('Error fetching staff:', error)

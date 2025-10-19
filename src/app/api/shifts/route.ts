@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { shiftRepository } from '@/lib/repositories'
 import { shiftSchema } from '@/lib/validations/shift'
 
 export async function GET(request: Request) {
@@ -9,32 +9,31 @@ export async function GET(request: Request) {
     const endDate = searchParams.get('endDate')
     const staffId = searchParams.get('staffId')
 
-    const where: any = {}
-    
-    if (startDate && endDate) {
-      where.date = {
-        gte: new Date(startDate),
-        lte: new Date(endDate),
-      }
-    }
-    
+    let shifts
+
     if (staffId) {
-      where.staffId = staffId
+      shifts = await shiftRepository.findByStaffId(staffId)
+    } else if (startDate && endDate) {
+      shifts = await shiftRepository.findByDateRange(
+        new Date(startDate),
+        new Date(endDate)
+      )
+    } else {
+      shifts = await shiftRepository.findAll()
     }
 
-    const shifts = await prisma.shift.findMany({
-      where,
-      include: {
-        staff: true,
-      },
-      orderBy: { date: 'asc' },
+    return NextResponse.json({
+      success: true,
+      data: shifts,
     })
-    
-    return NextResponse.json(shifts)
   } catch (error) {
     console.error('Error fetching shifts:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch shifts' },
+      {
+        success: false,
+        error: 'Failed to fetch shifts',
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     )
   }
@@ -48,14 +47,15 @@ export async function POST(request: Request) {
     const validatedData = shiftSchema.parse(body)
     console.log('Validated shift data:', validatedData)
 
-    const shift = await prisma.shift.create({
-      data: validatedData,
-      include: {
-        staff: true,
-      },
-    })
+    const shift = await shiftRepository.create(validatedData)
 
-    return NextResponse.json(shift, { status: 201 })
+    return NextResponse.json(
+      {
+        success: true,
+        data: shift,
+      },
+      { status: 201 }
+    )
   } catch (error) {
     console.error('Error creating shift:', error)
 
@@ -63,7 +63,11 @@ export async function POST(request: Request) {
     if (error && typeof error === 'object' && 'name' in error && error.name === 'ZodError') {
       console.error('Zod validation error:', JSON.stringify(error, null, 2))
       return NextResponse.json(
-        { error: 'Invalid request data', details: error },
+        {
+          success: false,
+          error: 'Invalid request data',
+          details: error,
+        },
         { status: 400 }
       )
     }
@@ -72,14 +76,22 @@ export async function POST(request: Request) {
     if (error && typeof error === 'object' && 'code' in error) {
       console.error('Prisma error:', error)
       return NextResponse.json(
-        { error: 'Database error', details: String(error) },
+        {
+          success: false,
+          error: 'Database error',
+          details: String(error),
+        },
         { status: 500 }
       )
     }
 
     // その他のエラー
     return NextResponse.json(
-      { error: 'Failed to create shift', details: error instanceof Error ? error.message : String(error) },
+      {
+        success: false,
+        error: 'Failed to create shift',
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     )
   }

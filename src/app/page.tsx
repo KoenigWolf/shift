@@ -1,15 +1,19 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Header } from '@/components/layout/Header'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Staff, Shift } from '@prisma/client'
-import { Users, Calendar, Clock, TrendingUp, Moon, Sun } from 'lucide-react'
-import Link from 'next/link'
-import { LoadingSpinner } from '@/components/common/LoadingSpinner'
+import { Users, Calendar, Clock, TrendingUp, Moon, Sun, LayoutDashboard } from 'lucide-react'
 import { SHIFT_TYPES } from '@/lib/validations/shift'
+import {
+  CompactPageHeader,
+  CompactStatCard,
+  CardHeaderWithIcon,
+  QuickActionButton,
+  EmptyState,
+  LoadingSpinner,
+} from '@/components/common'
 
 type ShiftWithStaff = Shift & {
   staff: Staff
@@ -29,13 +33,13 @@ export default function DashboardPage() {
         ])
 
         if (staffResponse.ok) {
-          const staffData = await staffResponse.json()
-          setStaff(staffData)
+          const staffResult = await staffResponse.json()
+          setStaff(staffResult.success ? staffResult.data : [])
         }
 
         if (shiftsResponse.ok) {
-          const shiftsData = await shiftsResponse.json()
-          setShifts(shiftsData)
+          const shiftsResult = await shiftsResponse.json()
+          setShifts(shiftsResult.success ? shiftsResult.data : [])
         }
       } catch (error) {
         console.error('Error fetching data:', error)
@@ -77,126 +81,66 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <main className="container mx-auto px-4 py-6">
-          <LoadingSpinner />
-        </main>
-      </div>
+      <main className="container mx-auto px-4 py-6">
+        <LoadingSpinner />
+      </main>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <main className="container mx-auto px-4 py-6">
-        <div className="space-y-6">
-          {/* 統計カード */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-            <Card className="card-elevated animate-fade-in border-l-4 border-l-blue-500" style={{ animationDelay: '0ms' }}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">看護師数</CardTitle>
-                <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                  <Users className="h-5 w-5 text-blue-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold gradient-text">{staff.length}</div>
-                <p className="text-xs text-gray-500 mt-1">
-                  登録済み看護師
-                </p>
-              </CardContent>
-            </Card>
+    <main className="container mx-auto px-4 py-3 max-w-[1600px]">
+      <CompactPageHeader
+        title="ダッシュボード"
+        description="シフト管理システムの概要"
+        icon={LayoutDashboard}
+        gradient="from-blue-500 to-purple-600"
+      />
 
-            <Card className="card-elevated animate-fade-in border-l-4 border-l-yellow-500" style={{ animationDelay: '50ms' }}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">今日の日勤</CardTitle>
-                <div className="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center">
-                  <Sun className="h-5 w-5 text-yellow-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-yellow-600">{todayDayShifts.length}</div>
-                <p className="text-xs text-gray-500 mt-1">
-                  日勤スタッフ数
-                </p>
-              </CardContent>
-            </Card>
+      <div className="space-y-4">
+        {/* コンパクトな統計カード */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+          <CompactStatCard title="看護師数" value={staff.length} icon={Users} color="blue" delay={0} />
+          <CompactStatCard title="今日の日勤" value={todayDayShifts.length} icon={Sun} color="yellow" delay={50} />
+          <CompactStatCard title="今日の夜勤" value={todayNightShifts.length} icon={Moon} color="purple" delay={100} />
+          <CompactStatCard title="今週のシフト" value={thisWeekShifts.length} icon={Calendar} color="green" delay={150} />
+          <CompactStatCard title="総シフト数" value={shifts.length} icon={TrendingUp} color="indigo" delay={200} />
+        </div>
 
-            <Card className="card-elevated animate-fade-in border-l-4 border-l-purple-500" style={{ animationDelay: '100ms' }}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">今日の夜勤</CardTitle>
-                <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                  <Moon className="h-5 w-5 text-purple-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-purple-600">{todayNightShifts.length}</div>
-                <p className="text-xs text-gray-500 mt-1">
-                  夜勤スタッフ数
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="card-elevated animate-fade-in border-l-4 border-l-green-500" style={{ animationDelay: '150ms' }}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">今週のシフト</CardTitle>
-                <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                  <Calendar className="h-5 w-5 text-green-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-green-600">{thisWeekShifts.length}</div>
-                <p className="text-xs text-gray-500 mt-1">
-                  今週の予定
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="card-elevated animate-fade-in border-l-4 border-l-indigo-500" style={{ animationDelay: '200ms' }}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">総シフト数</CardTitle>
-                <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center">
-                  <TrendingUp className="h-5 w-5 text-indigo-600" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-indigo-600">{shifts.length}</div>
-                <p className="text-xs text-gray-500 mt-1">
-                  全期間のシフト
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
+        {/* メインコンテンツ: 2カラムレイアウト */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* 今日のシフト */}
-          <Card>
-            <CardHeader>
-              <CardTitle>今日のシフト</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <Card className="lg:col-span-2 shadow-lg border-0">
+            <CardHeaderWithIcon title="今日のシフト" icon={Calendar} gradient="from-blue-400 to-blue-600" />
+            <div className="px-4 pb-4">
               {todayShifts.length === 0 ? (
-                <p className="text-gray-500">今日のシフトはありません</p>
+                <EmptyState
+                  icon={Calendar}
+                  title="今日のシフトはありません"
+                  description="本日予定されているシフトはありません"
+                  className="py-6"
+                />
               ) : (
                 <div className="space-y-2">
-                  {todayShifts.map((shift) => {
+                  {todayShifts.map((shift, index) => {
                     const shiftTypeConfig = SHIFT_TYPES.find(st => st.value === shift.shiftType)
                     return (
                       <div
                         key={shift.id}
-                        className="flex items-center justify-between p-3 border rounded-lg"
+                        className="flex items-center justify-between p-2.5 border rounded-lg hover:bg-gray-50 hover:shadow-sm transition-all duration-200 animate-slide-up group"
+                        style={{ animationDelay: `${index * 30}ms` }}
                       >
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center gap-2.5">
                           <div
-                            className="w-4 h-4 rounded-full"
+                            className="w-2.5 h-2.5 rounded-full transition-transform duration-300 group-hover:scale-125"
                             style={{ backgroundColor: shift.staff.color }}
                           />
                           <div>
-                            <span className="font-medium">{shift.staff.name}</span>
-                            <div className="text-xs text-gray-500">{shift.staff.role}</div>
+                            <span className="font-medium text-sm">{shift.staff.name}</span>
+                            <div className="text-[10px] text-gray-500">{shift.staff.role}</div>
                           </div>
                           <Badge
                             variant="outline"
+                            className="text-[10px] h-5 px-2 transition-all duration-300 group-hover:shadow-sm"
                             style={{
                               borderColor: shiftTypeConfig?.color,
                               color: shiftTypeConfig?.color
@@ -205,7 +149,7 @@ export default function DashboardPage() {
                             {shiftTypeConfig?.icon} {shift.shiftType}
                           </Badge>
                         </div>
-                        <div className="text-sm text-gray-600">
+                        <div className="text-[10px] text-gray-600 font-medium">
                           {shift.startTime} - {shift.endTime}
                         </div>
                       </div>
@@ -213,39 +157,45 @@ export default function DashboardPage() {
                   })}
                 </div>
               )}
-            </CardContent>
+            </div>
           </Card>
 
           {/* クイックアクション */}
-          <Card>
-            <CardHeader>
-              <CardTitle>クイックアクション</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Link href="/staff">
-                  <Button className="w-full justify-start">
-                    <Users className="h-4 w-4 mr-2" />
-                    スタッフ管理
-                  </Button>
-                </Link>
-                <Link href="/shifts">
-                  <Button className="w-full justify-start">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    シフト作成
-                  </Button>
-                </Link>
-                <Link href="/calendar">
-                  <Button className="w-full justify-start">
-                    <Clock className="h-4 w-4 mr-2" />
-                    カレンダー表示
-                  </Button>
-                </Link>
+          <Card className="shadow-lg border-0">
+            <CardHeaderWithIcon title="クイックアクション" icon={TrendingUp} gradient="from-purple-400 to-purple-600" />
+            <div className="px-4 pb-4">
+              <div className="space-y-2">
+                <QuickActionButton
+                  icon={Users}
+                  label="スタッフ管理"
+                  href="/staff"
+                  className="h-10"
+                />
+                <QuickActionButton
+                  icon={Calendar}
+                  label="シフト作成"
+                  href="/shifts"
+                  className="h-10"
+                />
+                <QuickActionButton
+                  icon={Clock}
+                  label="希望提出"
+                  href="/preferences"
+                  variant="outline"
+                  className="h-10"
+                />
+                <QuickActionButton
+                  icon={TrendingUp}
+                  label="シフト集約"
+                  href="/shift-dashboard"
+                  variant="outline"
+                  className="h-10"
+                />
               </div>
-            </CardContent>
+            </div>
           </Card>
         </div>
-      </main>
-    </div>
+      </div>
+    </main>
   )
 }

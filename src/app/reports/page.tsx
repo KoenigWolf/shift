@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Header } from '@/components/layout/Header'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -28,13 +27,15 @@ export default function ReportsPage() {
     try {
       const response = await fetch('/api/staff')
       if (response.ok) {
-        const staffData = await response.json()
+        const result = await response.json()
+        const staffData = result.success ? result.data : []
 
         // 各スタッフのシフトを取得
         const staffWithShifts = await Promise.all(
           staffData.map(async (s: Staff) => {
             const shiftsResponse = await fetch(`/api/shifts?staffId=${s.id}`)
-            const shifts = shiftsResponse.ok ? await shiftsResponse.json() : []
+            const shiftsResult = await shiftsResponse.json()
+            const shifts = shiftsResult.success ? shiftsResult.data : []
             return { ...s, shifts }
           })
         )
@@ -63,21 +64,16 @@ export default function ReportsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <main className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          </div>
-        </main>
-      </div>
+      <main className="container mx-auto px-4 py-4 max-w-[1600px]">
+        <div className="flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      </main>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <main className="container mx-auto px-4 py-6">
+    <main className="container mx-auto px-4 py-4 max-w-[1600px]">
         <div className="space-y-6">
           <div className="flex justify-end">
             <Button variant="outline" className="shadow-md hover:shadow-lg transition-shadow">
@@ -89,7 +85,7 @@ export default function ReportsPage() {
           {/* 期間選択 */}
           <Card>
             <CardContent className="p-6">
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-6">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">年</label>
                   <Select
@@ -198,6 +194,5 @@ export default function ReportsPage() {
           </Card>
         </div>
       </main>
-    </div>
   )
 }

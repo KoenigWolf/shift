@@ -5,7 +5,7 @@ import { Calendar } from '@/components/ui/calendar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, ChevronRight, Users, Moon, Sun, Clock, Sunrise } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Users, Moon, Sun, Clock, Sunrise, Calendar as CalendarIcon } from 'lucide-react'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, getDay, startOfWeek, endOfWeek, addDays } from 'date-fns'
 import { ja } from 'date-fns/locale'
 import { ShiftWithStaff } from '@/types'
@@ -212,7 +212,7 @@ export function ShiftCalendar({ shifts, onDateSelect }: ShiftCalendarProps) {
             <CardHeaderWithIcon
               title={format(selectedDate, 'M月d日', { locale: ja })}
               subtitle={`${selectedDateShifts.length}件のシフト`}
-              icon={Calendar}
+              icon={CalendarIcon}
               gradient="from-blue-400 to-blue-600"
               actions={
                 <Badge variant="outline" className="text-xs h-5">

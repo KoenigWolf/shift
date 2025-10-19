@@ -6,7 +6,11 @@
       "Bash(find src/app/api -name \"route.ts\" -exec echo \"=== {} ===\" ; -exec head -30 {} ;)",
       "Bash(npx prisma migrate dev --name add_shift_preference_and_automation)",
       "Bash(npm install @radix-ui/react-checkbox date-fns)",
-      "Bash(npm run build)"
+      "Bash(npm run build)",
+      "Bash(cat /Users/toshikisakuta/Documents/shift/src/components/common/CompactStatCard.tsx)",
+      "Bash(npx prisma migrate dev --name add_unique_constraint_shift_preference)",
+      "Bash(npx prisma db push)",
+      "Bash(npx prisma db push --accept-data-loss)"
     ],
     "deny": [],
     "ask": []

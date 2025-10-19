@@ -56,9 +56,15 @@ export class ShiftRepository {
   /**
    * シフトを作成
    */
-  async create(data: Prisma.ShiftCreateInput) {
+  async create(data: Omit<Prisma.ShiftCreateInput, 'staff'> & { staffId: string }) {
+    const { staffId, ...rest } = data
     return await prisma.shift.create({
-      data,
+      data: {
+        ...rest,
+        staff: {
+          connect: { id: staffId }
+        }
+      },
       include: { staff: true },
     })
   }
@@ -89,7 +95,6 @@ export class ShiftRepository {
   async createMany(data: Prisma.ShiftCreateManyInput[]) {
     return await prisma.shift.createMany({
       data,
-      skipDuplicates: true,
     })
   }
 

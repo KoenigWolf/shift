@@ -1,9 +1,10 @@
 import { LucideIcon } from 'lucide-react'
-import { Button, ButtonProps } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
+import React from 'react'
 
-interface ActionButtonProps extends Omit<ButtonProps, 'children'> {
+interface ActionButtonProps extends React.ComponentProps<typeof Button> {
   icon: LucideIcon
   label: string
   href?: string

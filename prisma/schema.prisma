@@ -94,6 +94,7 @@ model ShiftPreference {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
+  @@unique([staffId, targetMonth])
   @@index([staffId])
   @@index([targetMonth])
   @@index([status])

@@ -1,8 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { shiftRepository } from '@/lib/repositories'
 import { generateShifts, GenerationConfig } from '@/lib/shiftGenerator'
 import { startOfMonth, parseISO } from 'date-fns'
 import { z } from 'zod'
+import { withErrorHandling, successResponse, withValidation, getQueryParams } from '@/lib/api/apiHandler'
 
 const generateRequestSchema = z.object({
   targetMonth: z.string().datetime(),
@@ -23,14 +25,11 @@ const generateRequestSchema = z.object({
     .min(1),
 })
 
-/**
- * POST: シフトを自動生成
- */
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json()
-    const validated = generateRequestSchema.parse(body)
+type GenerateRequestBody = z.infer<typeof generateRequestSchema>
 
+export const POST = withValidation<GenerateRequestBody>(
+  generateRequestSchema,
+  async (request: NextRequest, validated: GenerateRequestBody) => {
     const targetMonth = parseISO(validated.targetMonth)
 
     // 設定をデータベースに保存
@@ -61,17 +60,15 @@ export async function POST(request: NextRequest) {
       // 生成されたシフトをデータベースに保存（下書きとして）
       const createdShifts = await Promise.all(
         result.assignments.map((assignment) =>
-          prisma.shift.create({
-            data: {
-              staffId: assignment.staffId,
-              date: assignment.date,
-              shiftType: assignment.shiftType,
-              startTime: assignment.startTime,
-              endTime: assignment.endTime,
-              breakTime: assignment.breakTime,
-              status: '下書き',
-              isPublished: false,
-            },
+          shiftRepository.create({
+            staffId: assignment.staffId,
+            date: assignment.date,
+            shiftType: assignment.shiftType,
+            startTime: assignment.startTime,
+            endTime: assignment.endTime,
+            breakTime: assignment.breakTime,
+            status: '下書き',
+            isPublished: false,
           })
         )
       )
@@ -86,16 +83,13 @@ export async function POST(request: NextRequest) {
         },
       })
 
-      return NextResponse.json(
+      return successResponse(
         {
-          success: true,
-          data: {
-            shifts: createdShifts,
-            summary: result.summary,
-            configId: config.id,
-          },
+          shifts: createdShifts,
+          summary: result.summary,
+          configId: config.id,
         },
-        { status: 201 }
+        201
       )
     } catch (error) {
       // エラー時は設定のステータスを更新
@@ -108,46 +102,23 @@ export async function POST(request: NextRequest) {
       })
       throw error
     }
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { success: false, error: 'バリデーションエラー', details: error.issues },
-        { status: 400 }
-      )
-    }
-    console.error('POST /api/shifts/generate error:', error)
-    return NextResponse.json(
-      { success: false, error: 'シフトの自動生成に失敗しました' },
-      { status: 500 }
-    )
   }
-}
+)
 
-/**
- * GET: 生成履歴を取得
- */
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url)
-    const targetMonth = searchParams.get('targetMonth')
+export const GET = withErrorHandling(async (request: NextRequest) => {
+  const searchParams = getQueryParams(request)
+  const targetMonth = searchParams.get('targetMonth')
 
-    const where: any = {}
-    if (targetMonth) {
-      where.targetMonth = parseISO(targetMonth)
-    }
-
-    const configs = await prisma.shiftGenerationConfig.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      take: 10,
-    })
-
-    return NextResponse.json({ success: true, data: configs })
-  } catch (error) {
-    console.error('GET /api/shifts/generate error:', error)
-    return NextResponse.json(
-      { success: false, error: '生成履歴の取得に失敗しました' },
-      { status: 500 }
-    )
+  const where: Record<string, unknown> = {}
+  if (targetMonth) {
+    where.targetMonth = parseISO(targetMonth)
   }
-}
+
+  const configs = await prisma.shiftGenerationConfig.findMany({
+    where,
+    orderBy: { createdAt: 'desc' },
+    take: 10,
+  })
+
+  return successResponse(configs)
+})

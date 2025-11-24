@@ -1,98 +1,37 @@
-import { NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { shiftRepository } from '@/lib/repositories'
 import { shiftSchema } from '@/lib/validations/shift'
+import { withErrorHandling, successResponse, withValidation, getQueryParams } from '@/lib/api/apiHandler'
+import { z } from 'zod'
 
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url)
-    const startDate = searchParams.get('startDate')
-    const endDate = searchParams.get('endDate')
-    const staffId = searchParams.get('staffId')
+type ShiftBody = z.infer<typeof shiftSchema>
 
-    let shifts
+export const GET = withErrorHandling(async (request: NextRequest) => {
+  const searchParams = getQueryParams(request)
+  const startDate = searchParams.get('startDate')
+  const endDate = searchParams.get('endDate')
+  const staffId = searchParams.get('staffId')
 
-    if (staffId) {
-      shifts = await shiftRepository.findByStaffId(staffId)
-    } else if (startDate && endDate) {
-      shifts = await shiftRepository.findByDateRange(
-        new Date(startDate),
-        new Date(endDate)
-      )
-    } else {
-      shifts = await shiftRepository.findAll()
-    }
+  let shifts
 
-    return NextResponse.json({
-      success: true,
-      data: shifts,
-    })
-  } catch (error) {
-    console.error('Error fetching shifts:', error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to fetch shifts',
-        details: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 }
+  if (staffId) {
+    shifts = await shiftRepository.findByStaffId(staffId)
+  } else if (startDate && endDate) {
+    shifts = await shiftRepository.findByDateRange(
+      new Date(startDate),
+      new Date(endDate)
     )
+  } else {
+    shifts = await shiftRepository.findAll()
   }
-}
 
-export async function POST(request: Request) {
-  try {
-    const body = await request.json()
-    console.log('Received shift data:', body)
+  return successResponse(shifts)
+})
 
-    const validatedData = shiftSchema.parse(body)
-    console.log('Validated shift data:', validatedData)
-
+export const POST = withValidation<ShiftBody>(
+  shiftSchema,
+  async (request: NextRequest, validatedData: ShiftBody) => {
     const shift = await shiftRepository.create(validatedData)
-
-    return NextResponse.json(
-      {
-        success: true,
-        data: shift,
-      },
-      { status: 201 }
-    )
-  } catch (error) {
-    console.error('Error creating shift:', error)
-
-    // Zodエラーの場合
-    if (error && typeof error === 'object' && 'name' in error && error.name === 'ZodError') {
-      console.error('Zod validation error:', JSON.stringify(error, null, 2))
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Invalid request data',
-          details: error,
-        },
-        { status: 400 }
-      )
-    }
-
-    // Prismaエラーの場合
-    if (error && typeof error === 'object' && 'code' in error) {
-      console.error('Prisma error:', error)
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Database error',
-          details: String(error),
-        },
-        { status: 500 }
-      )
-    }
-
-    // その他のエラー
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to create shift',
-        details: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 }
-    )
+    return successResponse(shift, 201)
   }
-}
+)

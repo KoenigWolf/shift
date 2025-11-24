@@ -1,43 +1,28 @@
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { templateSchema } from '@/lib/validations/template'
+import { NextRequest } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { templateSchema } from "@/lib/validations/template";
+import {
+  withErrorHandling,
+  successResponse,
+  withValidation,
+} from "@/lib/api/apiHandler";
+import { z } from "zod";
 
-export async function GET() {
-  try {
-    const templates = await prisma.shiftTemplate.findMany({
-      orderBy: { createdAt: 'desc' },
-    })
-    return NextResponse.json(templates)
-  } catch (error) {
-    console.error('Error fetching templates:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch templates' },
-      { status: 500 }
-    )
-  }
-}
+type TemplateBody = z.infer<typeof templateSchema>;
 
-export async function POST(request: Request) {
-  try {
-    const body = await request.json()
-    const validatedData = templateSchema.parse(body)
-    
+export const GET = withErrorHandling(async () => {
+  const templates = await prisma.shiftTemplate.findMany({
+    orderBy: { createdAt: "desc" },
+  });
+  return successResponse(templates);
+});
+
+export const POST = withValidation<TemplateBody>(
+  templateSchema,
+  async (request: NextRequest, validatedData: TemplateBody) => {
     const template = await prisma.shiftTemplate.create({
       data: validatedData,
-    })
-    
-    return NextResponse.json(template, { status: 201 })
-  } catch (error) {
-    console.error('Error creating template:', error)
-    if (error instanceof Error && error.name === 'ZodError') {
-      return NextResponse.json(
-        { error: 'Invalid request data', details: error.message },
-        { status: 400 }
-      )
-    }
-    return NextResponse.json(
-      { error: 'Failed to create template' },
-      { status: 500 }
-    )
+    });
+    return successResponse(template, 201);
   }
-}
+);

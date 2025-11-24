@@ -1,86 +1,45 @@
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextRequest } from 'next/server'
+import { leaveRequestRepository } from '@/lib/repositories'
 import { leaveRequestSchema } from '@/lib/validations/leaveRequest'
+import { NotFoundError } from '@/shared/errors/AppError'
+import { withErrorHandling, successResponse, withValidation, getParams } from '@/lib/api/apiHandler'
+import { z } from 'zod'
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params
-    const leaveRequest = await prisma.leaveRequest.findUnique({
-      where: { id },
-      include: {
-        staff: true,
-      },
-    })
+type LeaveRequestParams = { id: string }
+type LeaveRequestBody = z.infer<typeof leaveRequestSchema>
 
-    if (!leaveRequest) {
-      return NextResponse.json(
-        { error: 'Leave request not found' },
-        { status: 404 }
-      )
-    }
+export const GET = withErrorHandling<LeaveRequestParams>(async (
+  request: NextRequest,
+  context?: { params?: Promise<LeaveRequestParams> }
+) => {
+  const { id } = await getParams<LeaveRequestParams>(context)
+  const leaveRequest = await leaveRequestRepository.findById(id)
 
-    return NextResponse.json(leaveRequest)
-  } catch (error) {
-    console.error('Error fetching leave request:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch leave request' },
-      { status: 500 }
-    )
+  if (!leaveRequest) {
+    throw new NotFoundError('休暇申請', id)
   }
-}
 
-export async function PUT(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params
-    const body = await request.json()
-    const validatedData = leaveRequestSchema.parse(body)
+  return successResponse(leaveRequest)
+})
 
-    const leaveRequest = await prisma.leaveRequest.update({
-      where: { id },
-      data: validatedData,
-      include: {
-        staff: true,
-      },
-    })
-
-    return NextResponse.json(leaveRequest)
-  } catch (error) {
-    console.error('Error updating leave request:', error)
-    if (error instanceof Error && error.name === 'ZodError') {
-      return NextResponse.json(
-        { error: 'Invalid request data', details: error.message },
-        { status: 400 }
-      )
-    }
-    return NextResponse.json(
-      { error: 'Failed to update leave request' },
-      { status: 500 }
-    )
+export const PUT = withValidation<LeaveRequestBody, LeaveRequestParams>(
+  leaveRequestSchema,
+  async (
+    request: NextRequest,
+    validatedData: LeaveRequestBody,
+    context?: { params?: Promise<LeaveRequestParams> }
+  ) => {
+    const { id } = await getParams<LeaveRequestParams>(context)
+    const leaveRequest = await leaveRequestRepository.update(id, validatedData)
+    return successResponse(leaveRequest)
   }
-}
+)
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params
-    await prisma.leaveRequest.delete({
-      where: { id },
-    })
-
-    return NextResponse.json({ message: 'Leave request deleted successfully' })
-  } catch (error) {
-    console.error('Error deleting leave request:', error)
-    return NextResponse.json(
-      { error: 'Failed to delete leave request' },
-      { status: 500 }
-    )
-  }
-}
+export const DELETE = withErrorHandling<LeaveRequestParams>(async (
+  request: NextRequest,
+  context?: { params?: Promise<LeaveRequestParams> }
+) => {
+  const { id } = await getParams<LeaveRequestParams>(context)
+  await leaveRequestRepository.delete(id)
+  return successResponse({ message: '休暇申請を削除しました' })
+})

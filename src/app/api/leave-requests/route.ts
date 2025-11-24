@@ -1,61 +1,29 @@
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextRequest } from 'next/server'
+import { leaveRequestRepository } from '@/lib/repositories'
 import { leaveRequestSchema } from '@/lib/validations/leaveRequest'
+import { withErrorHandling, successResponse, withValidation, getQueryParams } from '@/lib/api/apiHandler'
+import { z } from 'zod'
+import { Prisma } from '@prisma/client'
 
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url)
-    const staffId = searchParams.get('staffId')
-    const status = searchParams.get('status')
+type LeaveRequestBody = z.infer<typeof leaveRequestSchema>
 
-    const where: any = {}
-    if (staffId) where.staffId = staffId
-    if (status) where.status = status
+export const GET = withErrorHandling(async (request: NextRequest) => {
+  const searchParams = getQueryParams(request)
+  const staffId = searchParams.get('staffId')
+  const status = searchParams.get('status')
 
-    const leaveRequests = await prisma.leaveRequest.findMany({
-      where,
-      include: {
-        staff: true,
-      },
-      orderBy: {
-        startDate: 'desc',
-      },
-    })
+  const where: Prisma.LeaveRequestWhereInput = {}
+  if (staffId) where.staffId = staffId
+  if (status) where.status = status
 
-    return NextResponse.json(leaveRequests)
-  } catch (error) {
-    console.error('Error fetching leave requests:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch leave requests' },
-      { status: 500 }
-    )
+  const leaveRequests = await leaveRequestRepository.findAll(where)
+  return successResponse(leaveRequests)
+})
+
+export const POST = withValidation<LeaveRequestBody>(
+  leaveRequestSchema,
+  async (request: NextRequest, validatedData: LeaveRequestBody) => {
+    const leaveRequest = await leaveRequestRepository.create(validatedData)
+    return successResponse(leaveRequest, 201)
   }
-}
-
-export async function POST(request: Request) {
-  try {
-    const body = await request.json()
-    const validatedData = leaveRequestSchema.parse(body)
-
-    const leaveRequest = await prisma.leaveRequest.create({
-      data: validatedData,
-      include: {
-        staff: true,
-      },
-    })
-
-    return NextResponse.json(leaveRequest)
-  } catch (error) {
-    console.error('Error creating leave request:', error)
-    if (error instanceof Error && error.name === 'ZodError') {
-      return NextResponse.json(
-        { error: 'Invalid request data', details: error.message },
-        { status: 400 }
-      )
-    }
-    return NextResponse.json(
-      { error: 'Failed to create leave request' },
-      { status: 500 }
-    )
-  }
-}
+)

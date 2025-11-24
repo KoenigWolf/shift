@@ -1,60 +1,23 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextRequest } from 'next/server'
+import { notificationRepository } from '@/lib/repositories'
+import { withErrorHandling, successResponse, getParams } from '@/lib/api/apiHandler'
 
-/**
- * PATCH: 通知を既読にする
- */
-export async function PATCH(
+type NotificationParams = { id: string }
+
+export const PATCH = withErrorHandling<NotificationParams>(async (
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params
+  context?: { params?: Promise<NotificationParams> }
+) => {
+  const { id } = await getParams<NotificationParams>(context)
+  const notification = await notificationRepository.markAsRead(id)
+  return successResponse(notification)
+})
 
-    const notification = await prisma.notification.update({
-      where: { id },
-      data: { isRead: true },
-      include: {
-        staff: {
-          select: {
-            id: true,
-            name: true,
-            role: true,
-          },
-        },
-      },
-    })
-
-    return NextResponse.json({ success: true, data: notification })
-  } catch (error) {
-    console.error('PATCH /api/notifications/[id] error:', error)
-    return NextResponse.json(
-      { success: false, error: '通知の更新に失敗しました' },
-      { status: 500 }
-    )
-  }
-}
-
-/**
- * DELETE: 通知を削除
- */
-export async function DELETE(
+export const DELETE = withErrorHandling<NotificationParams>(async (
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params
-
-    await prisma.notification.delete({
-      where: { id },
-    })
-
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error('DELETE /api/notifications/[id] error:', error)
-    return NextResponse.json(
-      { success: false, error: '通知の削除に失敗しました' },
-      { status: 500 }
-    )
-  }
-}
+  context?: { params?: Promise<NotificationParams> }
+) => {
+  const { id } = await getParams<NotificationParams>(context)
+  await notificationRepository.delete(id)
+  return successResponse({ message: '通知を削除しました' })
+})

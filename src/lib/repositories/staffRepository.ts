@@ -25,6 +25,16 @@ export class StaffRepository {
   }
 
   /**
+   * IDでスタッフを取得（シフト情報を含む）
+   */
+  async findByIdWithShifts(id: string) {
+    return await prisma.staff.findUnique({
+      where: { id },
+      include: { shifts: true },
+    })
+  }
+
+  /**
    * スタッフを作成
    */
   async create(data: Prisma.StaffCreateInput): Promise<Staff> {

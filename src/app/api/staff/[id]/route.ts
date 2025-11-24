@@ -1,98 +1,45 @@
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextRequest } from 'next/server'
+import { staffRepository } from '@/lib/repositories'
 import { staffSchema } from '@/lib/validations/staff'
+import { NotFoundError } from '@/shared/errors/AppError'
+import { withErrorHandling, successResponse, withValidation, getParams } from '@/lib/api/apiHandler'
+import { z } from 'zod'
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params
-    const staff = await prisma.staff.findUnique({
-      where: { id },
-      include: { shifts: true },
-    })
-    
-    if (!staff) {
-      return NextResponse.json(
-        { error: 'Staff not found' },
-        { status: 404 }
-      )
-    }
-    
-    return NextResponse.json(staff)
-  } catch (error) {
-    console.error('Error fetching staff:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch staff' },
-      { status: 500 }
-    )
+type StaffParams = { id: string }
+type StaffBody = z.infer<typeof staffSchema>
+
+export const GET = withErrorHandling<StaffParams>(async (
+  request: NextRequest,
+  context?: { params?: Promise<StaffParams> }
+) => {
+  const { id } = await getParams<StaffParams>(context)
+  const staff = await staffRepository.findByIdWithShifts(id)
+  
+  if (!staff) {
+    throw new NotFoundError('スタッフ', id)
   }
-}
+  
+  return successResponse(staff)
+})
 
-export async function PUT(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params
-    const body = await request.json()
-    console.log('Updating staff with data:', body)
-
-    const validatedData = staffSchema.parse(body)
-    console.log('Validated staff data:', validatedData)
-
-    const staff = await prisma.staff.update({
-      where: { id },
-      data: validatedData,
-    })
-
-    return NextResponse.json(staff)
-  } catch (error) {
-    console.error('Error updating staff:', error)
-
-    // Zodエラーの場合
-    if (error && typeof error === 'object' && 'name' in error && error.name === 'ZodError') {
-      console.error('Zod validation error:', JSON.stringify(error, null, 2))
-      return NextResponse.json(
-        { error: 'Invalid request data', details: error },
-        { status: 400 }
-      )
-    }
-
-    // Prismaエラーの場合
-    if (error && typeof error === 'object' && 'code' in error) {
-      console.error('Prisma error:', error)
-      return NextResponse.json(
-        { error: 'Database error', details: String(error) },
-        { status: 500 }
-      )
-    }
-
-    // その他のエラー
-    return NextResponse.json(
-      { error: 'Failed to update staff', details: error instanceof Error ? error.message : String(error) },
-      { status: 500 }
-    )
+export const PUT = withValidation<StaffBody, StaffParams>(
+  staffSchema,
+  async (
+    request: NextRequest,
+    validatedData: StaffBody,
+    context?: { params?: Promise<StaffParams> }
+  ) => {
+    const { id } = await getParams<StaffParams>(context)
+    const staff = await staffRepository.update(id, validatedData)
+    return successResponse(staff)
   }
-}
+)
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params
-    await prisma.staff.delete({
-      where: { id },
-    })
-    
-    return NextResponse.json({ message: 'Staff deleted successfully' })
-  } catch (error) {
-    console.error('Error deleting staff:', error)
-    return NextResponse.json(
-      { error: 'Failed to delete staff' },
-      { status: 500 }
-    )
-  }
-}
+export const DELETE = withErrorHandling<StaffParams>(async (
+  request: NextRequest,
+  context?: { params?: Promise<StaffParams> }
+) => {
+  const { id } = await getParams<StaffParams>(context)
+  await staffRepository.delete(id)
+  return successResponse({ message: 'スタッフを削除しました' })
+})

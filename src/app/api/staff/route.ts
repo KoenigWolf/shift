@@ -1,81 +1,20 @@
-import { NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { staffRepository } from '@/lib/repositories'
 import { staffSchema } from '@/lib/validations/staff'
+import { withErrorHandling, successResponse, withValidation } from '@/lib/api/apiHandler'
+import { z } from 'zod'
 
-export async function GET() {
-  try {
-    const staff = await staffRepository.findAll()
-    return NextResponse.json({
-      success: true,
-      data: staff,
-    })
-  } catch (error) {
-    console.error('Error fetching staff:', error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to fetch staff',
-        details: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 }
-    )
-  }
-}
+type StaffBody = z.infer<typeof staffSchema>
 
-export async function POST(request: Request) {
-  try {
-    const body = await request.json()
-    console.log('Received staff data:', body)
+export const GET = withErrorHandling(async () => {
+  const staff = await staffRepository.findAll()
+  return successResponse(staff)
+})
 
-    const validatedData = staffSchema.parse(body)
-    console.log('Validated staff data:', validatedData)
-
+export const POST = withValidation<StaffBody>(
+  staffSchema,
+  async (request: NextRequest, validatedData: StaffBody) => {
     const staff = await staffRepository.create(validatedData)
-
-    return NextResponse.json(
-      {
-        success: true,
-        data: staff,
-      },
-      { status: 201 }
-    )
-  } catch (error) {
-    console.error('Error creating staff:', error)
-
-    // Zodエラーの場合
-    if (error && typeof error === 'object' && 'name' in error && error.name === 'ZodError') {
-      console.error('Zod validation error:', JSON.stringify(error, null, 2))
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Invalid request data',
-          details: error,
-        },
-        { status: 400 }
-      )
-    }
-
-    // Prismaエラーの場合
-    if (error && typeof error === 'object' && 'code' in error) {
-      console.error('Prisma error:', error)
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Database error',
-          details: String(error),
-        },
-        { status: 500 }
-      )
-    }
-
-    // その他のエラー
-    return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to create staff',
-        details: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 }
-    )
+    return successResponse(staff, 201)
   }
-}
+)
